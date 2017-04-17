@@ -1,0 +1,25 @@
+{
+  "name": "oms-query",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "adal-node": "^0.1.22",
+    "config": "^1.25.1",
+    "request": "^2.81.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plasne/oms-query.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/plasne/oms-query/issues"
+  },
+  "homepage": "https://github.com/plasne/oms-query#readme"
+}
