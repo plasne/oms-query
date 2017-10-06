@@ -11,4 +11,27 @@ This sample shows how to query the Log Analytics component of Operational Manage
 
 ## Execution
 
-* node index.js
+```bash
+node index.js
+```
+
+## Info
+
+You can run the command like this...
+
+```bash
+node index.js info
+```
+
+...to get the information about the workspace in the file or...
+
+```bash
+node index.js --workspace myworkspace info
+```
+
+...to get information about a specified workspace.
+
+One reason to get the workspace information is to find out what version of the query system you are using. The version can be found under "properties/features/searchVersion".
+
+* 0 is the legacy query syntax
+* 1 is the new query syntax

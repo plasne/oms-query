@@ -5,7 +5,9 @@
   "main": "index.js",
   "dependencies": {
     "adal-node": "^0.1.22",
+    "commander": "^2.11.0",
     "config": "^1.25.1",
+    "qs": "^6.5.1",
     "request": "^2.81.0"
   },
   "devDependencies": {},
