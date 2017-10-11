@@ -25,7 +25,7 @@ node oms --api arm query
 
 Optionally, you can supply parameters to override the Resource Group, Workspace, and Workpace ID in the configuration file.
 
-```bash
+```text
   Usage: oms [options] [command]
 
 
