@@ -5,6 +5,7 @@ const adal = require("adal-node");
 const request = require("request");
 const cmd = require("commander");
 const qs = require("querystring");
+const crypto = require("crypto");
 
 // configuration
 const authority = config.get("authority");
@@ -15,11 +16,10 @@ const clientSecret = config.get("clientSecret");
 const resourceGroup = config.get("resourceGroup");
 const workspace = config.get("workspace");
 const workspaceId = config.get("workspaceId");
+const workspaceKey = config.get("workspaceKey");
 
 cmd
     .version("0.2.0")
-    .option("--api <value>", "Specify the API to use between: legacy, direct, azure.")
-    .option("--docs", "Show all documentation links.")
     .option("-r, --resource-group <value>", "Specify a Resource Group other than the one in the settings file.")
     .option("-w, --workspace <value>", "Specify a Workspace Name other than the one in the settings file.")
     .option("-i, --workspace-id <value>", "Specify a Workspace ID other than the one in the settings file.");
@@ -78,10 +78,52 @@ cmd
     });
 
 cmd
-    .command("query")
-    .description("Query OMS.")
+    .command("post")
+    .description("Posts a message to the OMS workspace.")
     .action(_ => {
-        switch (cmd.api) {
+
+        // create a demo message
+        const message = {
+            "field1": "stuff",
+            "field2": "things"
+        };
+
+        // create the signature
+        const ts = (new Date()).toUTCString(); // current timestamp in RFC-1123
+        const payload = JSON.stringify(message);
+        const len = payload.length;
+        const code = `POST\n${len}\napplication/json\nx-ms-date:${ts}\n/api/logs`;
+        const hmac = crypto.createHmac("sha256", new Buffer(workspaceKey, "base64"));
+        const signature = hmac.update(code, "utf-8").digest("base64");
+
+        // post
+        request.post({
+            uri: `https://${use_workspaceId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01`,
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Log-Type": "demo",
+                "x-ms-date": ts,
+                "Authorization": `SharedKey ${use_workspaceId}:${signature}`
+            },
+            body: payload
+        }, (error, response, body) => {
+            if (!error && response.statusCode == 200) {
+                console.log("posted successfully");
+            } else if (error) {
+                console.error(`error(301): ${error}`);
+            } else {
+                console.error(`error(302) ${response.statusCode}: ${response.statusMessage}`);
+            }
+        });
+
+    });
+
+cmd
+    .command("query <api>")
+    .description("Query OMS.")
+    .action(api => {
+        switch (api) {
 
             case "legacy":
 
@@ -155,18 +197,19 @@ cmd
                 context3.acquireTokenWithClientCredentials("https://management.azure.com/", clientId, clientSecret, (error, tokenResponse) => {
                     if (!error) {
                         request.post({
-                            uri: `https://management.azure.com/subscriptions/${subscription}/resourceGroups/${use_resourceGroup}/providers/Microsoft.OperationalInsights/workspaces/${use_workspace}/api/query?api-version=2017-01-01-preview`,
+                            uri: `https://management.azure.com/subscriptions/${subscription}/resourceGroups/${use_resourceGroup}/providers/Microsoft.OperationalInsights/workspaces/${use_workspace}/query?api-version=2017-10-01`,
                             headers: {
                                 Authorization: `Bearer ${tokenResponse.accessToken}`
                             },
                             body: {
-                                query: "search * | limit 5",
+                                query: "demo_CL | limit 5",
                                 timespan: "PT24H"
                             },
                             json: true
                         }, (error, response, body) => {
                             if (!error && response.statusCode == 200) {
-                                console.log(body);
+                                console.log(body.tables[0].columns);
+                                console.log(body.tables[0].rows);
                             } else if (error) {
                                 console.error(`error(301): ${error}`);
                             } else {
