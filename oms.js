@@ -93,7 +93,7 @@ cmd
         const payload = JSON.stringify(message);
         const len = payload.length;
         const code = `POST\n${len}\napplication/json\nx-ms-date:${ts}\n/api/logs`;
-        const hmac = crypto.createHmac("sha256", new Buffer(workspaceKey, "base64"));
+        const hmac = crypto.createHmac("sha256", new Buffer.from(workspaceKey, "base64"));
         const signature = hmac.update(code, "utf-8").digest("base64");
 
         // post
