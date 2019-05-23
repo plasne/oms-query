@@ -3,9 +3,11 @@
 const config = require("config");
 const adal = require("adal-node");
 const request = require("request");
+//require("request-debug")(request);
 const cmd = require("commander");
 const qs = require("querystring");
 const crypto = require("crypto");
+const moment = require("moment");
 
 // configuration
 const authority = config.get("authority");
@@ -83,17 +85,37 @@ cmd
     .action(_ => {
 
         // create a demo message
-        const message = {
-            "field1": "stuff",
-            "field2": "things"
-        };
+        const now = moment().subtract(6, "days").format("YYYY-MM-DDTHH:mm:ss") + "Z"; // ISO-8601;
+        const message = [
+            {
+                timestamp: now,
+                user: 'Ritchie5614',
+                process: 'motivating',
+                pid: 8528,
+                msg: 'I\'Ll reboot the haptic ADP interface, that should bus the SMTP interface!'
+            },
+            {
+                timestamp: now,
+                user: 'Yost3681',
+                process: 'bi-directional',
+                pid: 5454,
+                msg: 'You can\'t index the program without compressing the redundant TCP sensor!'
+            },
+            {
+                timestamp: now,
+                user: 'Huels7527',
+                process: 'hierarchy',
+                pid: 4751,
+                msg: 'The AI protocol is down, reboot the neural panel so we can compress the COM interface!'
+            }
+        ];
 
         // create the signature
         const ts = (new Date()).toUTCString(); // current timestamp in RFC-1123
         const payload = JSON.stringify(message);
-        const len = payload.length;
+        const len = Buffer.byteLength(payload);
         const code = `POST\n${len}\napplication/json\nx-ms-date:${ts}\n/api/logs`;
-        const hmac = crypto.createHmac("sha256", new Buffer(workspaceKey, "base64"));
+        const hmac = crypto.createHmac("sha256", new Buffer.from(workspaceKey, "base64"));
         const signature = hmac.update(code, "utf-8").digest("base64");
 
         // post
@@ -102,8 +124,9 @@ cmd
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Log-Type": "demo",
+                "Log-Type": "logagg_ts_minus6d",
                 "x-ms-date": ts,
+                "time-generated-field": "timestamp",
                 "Authorization": `SharedKey ${use_workspaceId}:${signature}`
             },
             body: payload
@@ -170,13 +193,13 @@ cmd
                                 Authorization: `Bearer ${tokenResponse.accessToken}`
                             },
                             body: {
-                                query: "search * | limit 5",
-                                timespan: "PT24H"
+                                query: "minus151_CL | limit 5",
+                                timespan: "P7D"
                             },
                             json: true
                         }, (error, response, body) => {
                             if (!error && response.statusCode == 200) {
-                                console.log(body);
+                                console.log(body.tables[0].rows);
                             } else if (error) {
                                 console.error(`error(201): ${error}`);
                             } else {
@@ -202,8 +225,8 @@ cmd
                                 Authorization: `Bearer ${tokenResponse.accessToken}`
                             },
                             body: {
-                                query: "demo_CL | limit 5",
-                                timespan: "PT24H"
+                                query: "search * | limit 5",
+                                timespan: "P7D"
                             },
                             json: true
                         }, (error, response, body) => {
