@@ -7,7 +7,7 @@
     "adal-node": "^0.1.28",
     "commander": "^2.11.0",
     "config": "^1.25.1",
-    "moment": "^2.22.2",
+    "moment": "^2.29.2",
     "qs": "^6.5.1",
     "request": "^2.87.0",
     "request-debug": "^0.2.0"
